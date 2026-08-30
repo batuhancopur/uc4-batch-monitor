@@ -16,7 +16,7 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=uc4Dail
 
 ## Data Flow
 
-- `uc4MetadataSyncJob`: truncates and reloads `uc4_job_definition` and `uc4_job_run_history`.
+- `uc4MetadataSyncJob`: deletes and reloads `uc4_job_definition` and `uc4_job_run_history` in one transaction.
 - `uc4RuntimeAnomalyDetectionJob`: reads the last 30 days from `uc4_job_run_history` and writes anomalies to `uc4_job_anomaly_log`.
 - `uc4DailyReportMailJob`: reads active rows from `uc4_report_subscription`, builds a daily report, and includes anomaly records for the same business date.
 
@@ -41,8 +41,8 @@ Target select/delete SQL is kept in resource files too:
 - `src/main/resources/sql/target/delete-anomalies-for-date.sql`
 - `src/main/resources/sql/target/select-anomalies-on-date.sql`
 - `src/main/resources/sql/target/select-active-report-subscriptions.sql`
-- `src/main/resources/sql/target/truncate-run-history.sql`
-- `src/main/resources/sql/target/truncate-job-definition.sql`
+- `src/main/resources/sql/target/delete-run-history.sql`
+- `src/main/resources/sql/target/delete-job-definition.sql`
 
 Keep the aliases used by the app:
 

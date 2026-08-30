@@ -25,8 +25,8 @@ public class Uc4TargetRepository {
     private final String insertJobDefinitionSql;
     private final String insertRunHistorySql;
     private final String insertAnomalyLogSql;
-    private final String truncateRunHistorySql;
-    private final String truncateJobDefinitionSql;
+    private final String deleteRunHistorySql;
+    private final String deleteJobDefinitionSql;
     private final String selectRunsOnDateSql;
     private final String selectDurationBaselinesSql;
     private final String selectActiveDefinitionNamesSql;
@@ -44,8 +44,8 @@ public class Uc4TargetRepository {
         this.insertJobDefinitionSql = sqlResourceLoader.read("classpath:sql/target/insert-job-definition.sql");
         this.insertRunHistorySql = sqlResourceLoader.read("classpath:sql/target/insert-run-history.sql");
         this.insertAnomalyLogSql = sqlResourceLoader.read("classpath:sql/target/insert-anomaly-log.sql");
-        this.truncateRunHistorySql = sqlResourceLoader.read("classpath:sql/target/truncate-run-history.sql");
-        this.truncateJobDefinitionSql = sqlResourceLoader.read("classpath:sql/target/truncate-job-definition.sql");
+        this.deleteRunHistorySql = sqlResourceLoader.read("classpath:sql/target/delete-run-history.sql");
+        this.deleteJobDefinitionSql = sqlResourceLoader.read("classpath:sql/target/delete-job-definition.sql");
         this.selectRunsOnDateSql = sqlResourceLoader.read("classpath:sql/target/select-runs-on-date.sql");
         this.selectDurationBaselinesSql = sqlResourceLoader.read("classpath:sql/target/select-duration-baselines.sql");
         this.selectActiveDefinitionNamesSql = sqlResourceLoader.read("classpath:sql/target/select-active-definition-names.sql");
@@ -58,8 +58,8 @@ public class Uc4TargetRepository {
             List<Uc4JobDefinition> definitions,
             List<Uc4JobRunHistory> histories
     ) {
-        jdbcTemplate.execute(truncateRunHistorySql);
-        jdbcTemplate.execute(truncateJobDefinitionSql);
+        jdbcTemplate.execute(deleteRunHistorySql);
+        jdbcTemplate.execute(deleteJobDefinitionSql);
         insertDefinitions(definitions);
         insertRunHistories(histories);
     }

@@ -1,1 +1,0 @@
-truncate table uc4_job_definition

@@ -1,0 +1,1 @@
+delete from uc4_job_definition
