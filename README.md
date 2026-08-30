@@ -3,6 +3,7 @@
 Spring Batch application for copying team-owned Automic UC4 workload data into a reporting database, detecting runtime anomalies, and sending daily HTML reports.
 
 The application assumes Oracle for both the UC4 source and the target reporting database.
+Target tables intentionally do not use foreign keys.
 
 ## Jobs
 
@@ -26,6 +27,14 @@ UC4 source SQL is kept in separate resource files and referenced from `src/main/
 
 - `src/main/resources/sql/uc4-job-definitions.sql`
 - `src/main/resources/sql/uc4-run-history.sql`
+
+The source SQL uses these Automic tables:
+
+- `OH` for object definitions
+- `JPP` for workflow/schedule task membership
+- `OFS` for folder paths
+- `AH` for archived run history and parent/top workflow run information
+- `RT` for the latest report line stored in the database
 
 Target insert SQL is also kept in resource files:
 

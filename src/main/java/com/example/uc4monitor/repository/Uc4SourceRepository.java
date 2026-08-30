@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -51,11 +52,12 @@ public class Uc4SourceRepository {
     }
 
     private Map<String, Object> commonParams(LocalDate lookbackStart) {
-        return Map.of(
-                "teamCode", properties.teamCode(),
-                "teamNamePattern", properties.teamNamePattern(),
-                "lookbackStart", Date.valueOf(lookbackStart)
-        );
+        Map<String, Object> params = new HashMap<>();
+        params.put("teamCode", properties.teamCode());
+        params.put("teamNamePattern", properties.teamNamePattern());
+        params.put("uc4Client", properties.client());
+        params.put("lookbackStart", Date.valueOf(lookbackStart));
+        return params;
     }
 
     private static final class DefinitionMapper implements RowMapper<Uc4JobDefinition> {

@@ -34,6 +34,7 @@ uc4:
     password: ${UC4_DB_PASSWORD:uc4}
     driver-class-name: ${UC4_DB_DRIVER:oracle.jdbc.OracleDriver}
   team-code: ${UC4_TEAM_CODE:TEAM}
+  client: ${UC4_CLIENT:}
   lookback-days: ${UC4_LOOKBACK_DAYS:30}
   sync:
     # Adjust these SQL files to your Automic version/schema. The application depends on the aliases only.

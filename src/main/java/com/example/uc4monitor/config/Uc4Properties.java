@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("uc4")
 public record Uc4Properties(
         @NotBlank String teamCode,
+        Integer client,
         @Min(1) int lookbackDays,
         @Valid Sync sync
 ) {
