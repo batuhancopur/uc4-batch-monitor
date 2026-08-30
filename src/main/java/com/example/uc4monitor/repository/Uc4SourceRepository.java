@@ -7,19 +7,13 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.FileCopyUtils;
 
 @Repository
 public class Uc4SourceRepository {
@@ -32,12 +26,12 @@ public class Uc4SourceRepository {
     public Uc4SourceRepository(
             @Qualifier("uc4NamedJdbcTemplate") NamedParameterJdbcTemplate uc4JdbcTemplate,
             Uc4Properties properties,
-            ResourceLoader resourceLoader
+            SqlResourceLoader sqlResourceLoader
     ) {
         this.uc4JdbcTemplate = uc4JdbcTemplate;
         this.properties = properties;
-        this.definitionQuery = readSql(resourceLoader, properties.sync().definitionQueryLocation());
-        this.runHistoryQuery = readSql(resourceLoader, properties.sync().runHistoryQueryLocation());
+        this.definitionQuery = sqlResourceLoader.read(properties.sync().definitionQueryLocation());
+        this.runHistoryQuery = sqlResourceLoader.read(properties.sync().runHistoryQueryLocation());
     }
 
     public List<Uc4JobDefinition> findTeamDefinitions() {
@@ -54,15 +48,6 @@ public class Uc4SourceRepository {
                 commonParams(LocalDate.now().minusDays(properties.lookbackDays())),
                 new RunHistoryMapper()
         );
-    }
-
-    private String readSql(ResourceLoader resourceLoader, String location) {
-        Resource resource = resourceLoader.getResource(location);
-        try (var reader = new java.io.InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
-            return FileCopyUtils.copyToString(reader);
-        } catch (IOException ex) {
-            throw new UncheckedIOException("Could not read SQL resource: " + location, ex);
-        }
     }
 
     private Map<String, Object> commonParams(LocalDate lookbackStart) {

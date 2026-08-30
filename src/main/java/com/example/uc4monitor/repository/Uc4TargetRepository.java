@@ -20,10 +20,20 @@ public class Uc4TargetRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedJdbcTemplate;
+    private final String insertJobDefinitionSql;
+    private final String insertRunHistorySql;
+    private final String insertAnomalyLogSql;
 
-    public Uc4TargetRepository(JdbcTemplate targetJdbcTemplate, NamedParameterJdbcTemplate targetNamedJdbcTemplate) {
+    public Uc4TargetRepository(
+            JdbcTemplate targetJdbcTemplate,
+            NamedParameterJdbcTemplate targetNamedJdbcTemplate,
+            SqlResourceLoader sqlResourceLoader
+    ) {
         this.jdbcTemplate = targetJdbcTemplate;
         this.namedJdbcTemplate = targetNamedJdbcTemplate;
+        this.insertJobDefinitionSql = sqlResourceLoader.read("classpath:sql/target/insert-job-definition.sql");
+        this.insertRunHistorySql = sqlResourceLoader.read("classpath:sql/target/insert-run-history.sql");
+        this.insertAnomalyLogSql = sqlResourceLoader.read("classpath:sql/target/insert-anomaly-log.sql");
     }
 
     public void replaceDefinitionsAndHistory(
@@ -99,17 +109,7 @@ public class Uc4TargetRepository {
     }
 
     public void insertAnomalies(List<Uc4JobAnomaly> anomalies) {
-        namedJdbcTemplate.batchUpdate("""
-                insert into uc4_job_anomaly_log (
-                    job_name, plan_name, run_id, business_date, anomaly_type,
-                    actual_duration_seconds, avg_duration_seconds, min_duration_seconds,
-                    max_duration_seconds, deviation_percent, description
-                ) values (
-                    :jobName, :planName, :runId, :businessDate, :anomalyType,
-                    :actualDurationSeconds, :avgDurationSeconds, :minDurationSeconds,
-                    :maxDurationSeconds, :deviationPercent, :description
-                )
-                """, anomalies.stream()
+        namedJdbcTemplate.batchUpdate(insertAnomalyLogSql, anomalies.stream()
                 .map(anomaly -> new MapSqlParameterSource()
                         .addValue("jobName", anomaly.jobName())
                         .addValue("planName", anomaly.planName())
@@ -161,13 +161,7 @@ public class Uc4TargetRepository {
     }
 
     private void insertDefinitions(List<Uc4JobDefinition> definitions) {
-        namedJdbcTemplate.batchUpdate("""
-                insert into uc4_job_definition (
-                    uc4_object_id, job_name, object_type, plan_name, folder_path, team_code, active
-                ) values (
-                    :uc4ObjectId, :jobName, :objectType, :planName, :folderPath, :teamCode, :active
-                )
-                """, definitions.stream()
+        namedJdbcTemplate.batchUpdate(insertJobDefinitionSql, definitions.stream()
                 .map(definition -> new MapSqlParameterSource()
                         .addValue("uc4ObjectId", definition.uc4ObjectId())
                         .addValue("jobName", definition.jobName())
@@ -180,15 +174,7 @@ public class Uc4TargetRepository {
     }
 
     private void insertRunHistories(List<Uc4JobRunHistory> histories) {
-        namedJdbcTemplate.batchUpdate("""
-                insert into uc4_job_run_history (
-                    uc4_run_id, job_name, plan_name, start_time, end_time, duration_seconds,
-                    status, return_code, last_report, business_date
-                ) values (
-                    :uc4RunId, :jobName, :planName, :startTime, :endTime, :durationSeconds,
-                    :status, :returnCode, :lastReport, :businessDate
-                )
-                """, histories.stream()
+        namedJdbcTemplate.batchUpdate(insertRunHistorySql, histories.stream()
                 .map(history -> new MapSqlParameterSource()
                         .addValue("uc4RunId", history.uc4RunId())
                         .addValue("jobName", history.jobName())

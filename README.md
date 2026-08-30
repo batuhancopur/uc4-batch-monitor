@@ -25,6 +25,12 @@ UC4 source SQL is kept in separate resource files and referenced from `src/main/
 - `src/main/resources/sql/uc4-job-definitions.sql`
 - `src/main/resources/sql/uc4-run-history.sql`
 
+Target insert SQL is also kept in resource files:
+
+- `src/main/resources/sql/target/insert-job-definition.sql`
+- `src/main/resources/sql/target/insert-run-history.sql`
+- `src/main/resources/sql/target/insert-anomaly-log.sql`
+
 Keep the aliases used by the app:
 
 - Definition query: `uc4_object_id`, `job_name`, `object_type`, `plan_name`, `folder_path`, `team_code`, `active`
