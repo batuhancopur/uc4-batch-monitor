@@ -65,14 +65,9 @@ public class SingleJobLauncher implements CommandLineRunner {
     }
 
     private JobParameters buildJobParameters() {
-        JobParametersBuilder builder = new JobParametersBuilder()
-                .addString("launchTimestamp", Instant.now().toString());
-
-        String businessDate = optionValue("businessDate");
-        if (StringUtils.hasText(businessDate)) {
-            builder.addString("businessDate", businessDate);
-        }
-        return builder.toJobParameters();
+        return new JobParametersBuilder()
+                .addString("launchTimestamp", Instant.now().toString())
+                .toJobParameters();
     }
 
     private String optionValue(String optionName) {

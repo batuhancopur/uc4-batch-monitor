@@ -29,6 +29,7 @@ class AnomalyDetectionServiceTest {
     @Test
     void detectsLongDurationAnomaly() {
         LocalDate businessDate = LocalDate.of(2026, 8, 30);
+        when(repository.currentBusinessDate()).thenReturn(businessDate);
         when(repository.findDurationBaselines(any(), any(), anyInt())).thenReturn(List.of(
                 new DurationBaseline("JOB_A", "PLAN_A", 10, BigDecimal.valueOf(100), 80, 120)
         ));
@@ -48,7 +49,7 @@ class AnomalyDetectionServiceTest {
         ));
         when(repository.findActiveDefinitionNames()).thenReturn(List.of("JOB_A"));
 
-        var anomalies = service.detectFor(businessDate);
+        var anomalies = service.detect();
 
         assertThat(anomalies).hasSize(1);
         assertThat(anomalies.get(0).anomalyType()).isEqualTo(AnomalyType.LONG_DURATION);

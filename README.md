@@ -8,11 +8,12 @@ Target tables intentionally do not use foreign keys.
 ## Jobs
 
 Run one job at a time with `--jobName`. The application disables Spring Boot's default batch launcher so that a parameterless startup cannot run all jobs.
+Anomaly detection and mail reporting use the target Oracle database date from `trunc(sysdate)`; no business date parameter is required.
 
 ```bash
 mvn spring-boot:run -Dspring-boot.run.arguments="--jobName=uc4MetadataSyncJob"
-mvn spring-boot:run -Dspring-boot.run.arguments="--jobName=uc4RuntimeAnomalyDetectionJob --businessDate=2026-08-30"
-mvn spring-boot:run -Dspring-boot.run.arguments="--jobName=uc4DailyReportMailJob --businessDate=2026-08-30"
+mvn spring-boot:run -Dspring-boot.run.arguments="--jobName=uc4RuntimeAnomalyDetectionJob"
+mvn spring-boot:run -Dspring-boot.run.arguments="--jobName=uc4DailyReportMailJob"
 ```
 
 ## Data Flow
@@ -52,6 +53,7 @@ Target select/delete SQL is kept in resource files too:
 - `src/main/resources/sql/target/select-active-report-subscriptions.sql`
 - `src/main/resources/sql/target/delete-run-history.sql`
 - `src/main/resources/sql/target/delete-job-definition.sql`
+- `src/main/resources/sql/target/select-current-business-date.sql`
 
 Keep the aliases used by the app:
 

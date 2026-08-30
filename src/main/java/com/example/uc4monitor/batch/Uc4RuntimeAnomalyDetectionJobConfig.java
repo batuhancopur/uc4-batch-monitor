@@ -25,12 +25,11 @@ public class Uc4RuntimeAnomalyDetectionJobConfig {
     public Step uc4RuntimeAnomalyDetectionStep(
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager,
-            AnomalyDetectionService anomalyDetectionService,
-            JobParameterSupport jobParameterSupport
+            AnomalyDetectionService anomalyDetectionService
     ) {
         return new StepBuilder("uc4RuntimeAnomalyDetectionStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
-                    anomalyDetectionService.detectFor(jobParameterSupport.resolveBusinessDate(chunkContext));
+                    anomalyDetectionService.detect();
                     return RepeatStatus.FINISHED;
                 }, transactionManager)
                 .build();

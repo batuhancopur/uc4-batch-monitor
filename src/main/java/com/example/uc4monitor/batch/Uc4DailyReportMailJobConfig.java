@@ -25,12 +25,11 @@ public class Uc4DailyReportMailJobConfig {
     public Step uc4DailyReportMailStep(
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager,
-            DailyReportMailService dailyReportMailService,
-            JobParameterSupport jobParameterSupport
+            DailyReportMailService dailyReportMailService
     ) {
         return new StepBuilder("uc4DailyReportMailStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
-                    dailyReportMailService.sendDailyReport(jobParameterSupport.resolveBusinessDate(chunkContext));
+                    dailyReportMailService.sendDailyReport();
                     return RepeatStatus.FINISHED;
                 }, transactionManager)
                 .build();
