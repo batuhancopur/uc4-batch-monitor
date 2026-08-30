@@ -36,10 +36,10 @@ public class AnomalyDetectionService {
     @Transactional
     public List<Uc4JobAnomaly> detectFor(LocalDate businessDate) {
         LocalDate baselineStart = businessDate.minusDays(properties.lookbackDays());
-        Map<String, DurationBaseline> baselines = repository
+        Map<BaselineKey, DurationBaseline> baselines = repository
                 .findDurationBaselines(baselineStart, businessDate, properties.minimumBaselineRuns())
                 .stream()
-                .collect(Collectors.toMap(DurationBaseline::jobName, Function.identity()));
+                .collect(Collectors.toMap(BaselineKey::from, Function.identity()));
         List<Uc4JobRunHistory> todaysRuns = repository.findRunsOn(businessDate);
 
         List<Uc4JobAnomaly> anomalies = new ArrayList<>();
@@ -48,20 +48,24 @@ public class AnomalyDetectionService {
                 anomalies.add(failedAnomaly(run, businessDate));
                 continue;
             }
-            DurationBaseline baseline = baselines.get(run.jobName());
+            DurationBaseline baseline = baselines.get(BaselineKey.from(run));
             if (baseline != null && run.durationSeconds() != null) {
                 durationAnomaly(run, baseline, businessDate).ifPresent(anomalies::add);
             }
         }
 
-        HashSet<String> ranToday = todaysRuns.stream()
-                .map(Uc4JobRunHistory::jobName)
-                .collect(Collectors.toCollection(HashSet::new));
-        repository.findActiveDefinitionNames().stream()
-                .filter(jobName -> baselines.containsKey(jobName))
-                .filter(jobName -> !ranToday.contains(jobName))
-                .map(jobName -> missingRunAnomaly(jobName, baselines.get(jobName), businessDate))
-                .forEach(anomalies::add);
+        if (properties.detectMissingRuns()) {
+            Map<String, DurationBaseline> baselinesByJobName = baselines.values().stream()
+                    .collect(Collectors.toMap(DurationBaseline::jobName, Function.identity(), (first, ignored) -> first));
+            HashSet<String> ranToday = todaysRuns.stream()
+                    .map(Uc4JobRunHistory::jobName)
+                    .collect(Collectors.toCollection(HashSet::new));
+            repository.findActiveDefinitionNames().stream()
+                    .filter(baselinesByJobName::containsKey)
+                    .filter(jobName -> !ranToday.contains(jobName))
+                    .map(jobName -> missingRunAnomaly(jobName, baselinesByJobName.get(jobName), businessDate))
+                    .forEach(anomalies::add);
+        }
 
         repository.deleteAnomaliesForDate(businessDate);
         repository.insertAnomalies(anomalies);
@@ -150,11 +154,23 @@ public class AnomalyDetectionService {
     }
 
     private boolean isFailed(Uc4JobRunHistory run) {
+        if (run.returnCode() != null && run.returnCode() != 0) {
+            return true;
+        }
         return run.status() != null && (
                 run.status().equalsIgnoreCase("FAILED")
                         || run.status().equalsIgnoreCase("ABENDED")
                         || run.status().startsWith("18")
-                        || (run.returnCode() != null && run.returnCode() != 0)
         );
+    }
+
+    private record BaselineKey(String jobName, String planName) {
+        private static BaselineKey from(DurationBaseline baseline) {
+            return new BaselineKey(baseline.jobName(), baseline.planName());
+        }
+
+        private static BaselineKey from(Uc4JobRunHistory run) {
+            return new BaselineKey(run.jobName(), run.planName());
+        }
     }
 }

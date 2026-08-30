@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 public record Uc4AnomalyProperties(
         @Min(1) int lookbackDays,
         @Min(1) int durationThresholdPercent,
-        @Min(1) int minimumBaselineRuns
+        @Min(1) int minimumBaselineRuns,
+        boolean detectMissingRuns
 ) {
 }

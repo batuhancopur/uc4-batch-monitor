@@ -23,14 +23,14 @@ class AnomalyDetectionServiceTest {
     private final Uc4TargetRepository repository = org.mockito.Mockito.mock(Uc4TargetRepository.class);
     private final AnomalyDetectionService service = new AnomalyDetectionService(
             repository,
-            new Uc4AnomalyProperties(30, 40, 5)
+            new Uc4AnomalyProperties(30, 40, 5, false)
     );
 
     @Test
     void detectsLongDurationAnomaly() {
         LocalDate businessDate = LocalDate.of(2026, 8, 30);
         when(repository.findDurationBaselines(any(), any(), anyInt())).thenReturn(List.of(
-                new DurationBaseline("JOB_A", 10, BigDecimal.valueOf(100), 80, 120)
+                new DurationBaseline("JOB_A", "PLAN_A", 10, BigDecimal.valueOf(100), 80, 120)
         ));
         when(repository.findRunsOn(businessDate)).thenReturn(List.of(
                 new Uc4JobRunHistory(

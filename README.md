@@ -2,6 +2,8 @@
 
 Spring Batch application for copying team-owned Automic UC4 workload data into a reporting database, detecting runtime anomalies, and sending daily HTML reports.
 
+The application assumes Oracle for both the UC4 source and the target reporting database.
+
 ## Jobs
 
 Run one job at a time with `spring.batch.job.name`.
@@ -51,5 +53,7 @@ The reporting scope is data-driven. Add or remove active rows in `uc4_report_sub
 
 ```sql
 insert into uc4_report_subscription (scope_type, scope_value, active)
-values ('JOB', 'MY_JOB', true), ('PLAN', 'MY_DAILY_PLAN', true);
+values ('JOB', 'MY_JOB', 1), ('PLAN', 'MY_DAILY_PLAN', 1);
 ```
+
+If there are no active report subscriptions, the mail job does not include every job by default. Missing-run anomaly detection is also disabled by default because it needs reliable schedule/calendar data to avoid false positives.

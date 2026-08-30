@@ -6,6 +6,8 @@ import com.example.uc4monitor.domain.Uc4JobAnomaly;
 import com.example.uc4monitor.domain.Uc4JobDefinition;
 import com.example.uc4monitor.domain.Uc4JobRunHistory;
 import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
@@ -69,9 +71,9 @@ public class Uc4TargetRepository {
                 rs.getString("plan_name"),
                 rs.getTimestamp("start_time").toLocalDateTime(),
                 rs.getTimestamp("end_time") == null ? null : rs.getTimestamp("end_time").toLocalDateTime(),
-                rs.getObject("duration_seconds", Long.class),
+                getNullableLong(rs, "duration_seconds"),
                 rs.getString("status"),
-                rs.getObject("return_code", Integer.class),
+                getNullableInteger(rs, "return_code"),
                 rs.getString("last_report"),
                 rs.getDate("business_date").toLocalDate()
         ));
@@ -84,6 +86,7 @@ public class Uc4TargetRepository {
                 "minimumRuns", minimumRuns
         ), (rs, rowNum) -> new DurationBaseline(
                 rs.getString("job_name"),
+                rs.getString("plan_name"),
                 rs.getLong("run_count"),
                 rs.getBigDecimal("avg_duration_seconds"),
                 rs.getLong("min_duration_seconds"),
@@ -126,10 +129,10 @@ public class Uc4TargetRepository {
                 rs.getString("run_id"),
                 rs.getDate("business_date").toLocalDate(),
                 com.example.uc4monitor.domain.AnomalyType.valueOf(rs.getString("anomaly_type")),
-                rs.getObject("actual_duration_seconds", Long.class),
+                getNullableLong(rs, "actual_duration_seconds"),
                 rs.getBigDecimal("avg_duration_seconds"),
-                rs.getObject("min_duration_seconds", Long.class),
-                rs.getObject("max_duration_seconds", Long.class),
+                getNullableLong(rs, "min_duration_seconds"),
+                getNullableLong(rs, "max_duration_seconds"),
                 rs.getBigDecimal("deviation_percent"),
                 rs.getString("description")
         ));
@@ -151,7 +154,7 @@ public class Uc4TargetRepository {
                         .addValue("planName", definition.planName())
                         .addValue("folderPath", definition.folderPath())
                         .addValue("teamCode", definition.teamCode())
-                        .addValue("active", definition.active()))
+                        .addValue("active", definition.active() ? 1 : 0))
                 .toArray(MapSqlParameterSource[]::new));
     }
 
@@ -169,5 +172,15 @@ public class Uc4TargetRepository {
                         .addValue("lastReport", history.lastReport())
                         .addValue("businessDate", Date.valueOf(history.businessDate())))
                 .toArray(MapSqlParameterSource[]::new));
+    }
+
+    private static Long getNullableLong(ResultSet rs, String column) throws SQLException {
+        long value = rs.getLong(column);
+        return rs.wasNull() ? null : value;
+    }
+
+    private static Integer getNullableInteger(ResultSet rs, String column) throws SQLException {
+        int value = rs.getInt(column);
+        return rs.wasNull() ? null : value;
     }
 }

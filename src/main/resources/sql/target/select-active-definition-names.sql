@@ -1,3 +1,3 @@
 select job_name
 from uc4_job_definition
-where active = true
+where active = 1

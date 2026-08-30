@@ -1,5 +1,6 @@
 select
   job_name,
+  plan_name,
   count(*) as run_count,
   avg(duration_seconds) as avg_duration_seconds,
   min(duration_seconds) as min_duration_seconds,
@@ -9,5 +10,5 @@ where business_date >= :from
   and business_date < :to
   and duration_seconds is not null
   and coalesce(status, '') not in ('FAILED', 'ABENDED')
-group by job_name
+group by job_name, plan_name
 having count(*) >= :minimumRuns

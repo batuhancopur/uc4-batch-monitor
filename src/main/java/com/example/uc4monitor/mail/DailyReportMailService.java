@@ -56,7 +56,7 @@ public class DailyReportMailService {
 
     private List<Uc4JobRunHistory> filter(List<Uc4JobRunHistory> runs, List<ReportSubscription> subscriptions) {
         if (subscriptions.isEmpty()) {
-            return runs;
+            return List.of();
         }
         Set<String> jobNames = valuesFor(subscriptions, "JOB");
         Set<String> planNames = valuesFor(subscriptions, "PLAN");
@@ -68,7 +68,7 @@ public class DailyReportMailService {
 
     private List<Uc4JobAnomaly> filterAnomalies(List<Uc4JobAnomaly> anomalies, List<ReportSubscription> subscriptions) {
         if (subscriptions.isEmpty()) {
-            return anomalies;
+            return List.of();
         }
         Set<String> jobNames = valuesFor(subscriptions, "JOB");
         Set<String> planNames = valuesFor(subscriptions, "PLAN");
