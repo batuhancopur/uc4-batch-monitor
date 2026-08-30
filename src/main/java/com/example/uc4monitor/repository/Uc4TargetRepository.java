@@ -23,6 +23,12 @@ public class Uc4TargetRepository {
     private final String insertJobDefinitionSql;
     private final String insertRunHistorySql;
     private final String insertAnomalyLogSql;
+    private final String selectRunsOnDateSql;
+    private final String selectDurationBaselinesSql;
+    private final String selectActiveDefinitionNamesSql;
+    private final String deleteAnomaliesForDateSql;
+    private final String selectAnomaliesOnDateSql;
+    private final String selectActiveReportSubscriptionsSql;
 
     public Uc4TargetRepository(
             JdbcTemplate targetJdbcTemplate,
@@ -34,6 +40,12 @@ public class Uc4TargetRepository {
         this.insertJobDefinitionSql = sqlResourceLoader.read("classpath:sql/target/insert-job-definition.sql");
         this.insertRunHistorySql = sqlResourceLoader.read("classpath:sql/target/insert-run-history.sql");
         this.insertAnomalyLogSql = sqlResourceLoader.read("classpath:sql/target/insert-anomaly-log.sql");
+        this.selectRunsOnDateSql = sqlResourceLoader.read("classpath:sql/target/select-runs-on-date.sql");
+        this.selectDurationBaselinesSql = sqlResourceLoader.read("classpath:sql/target/select-duration-baselines.sql");
+        this.selectActiveDefinitionNamesSql = sqlResourceLoader.read("classpath:sql/target/select-active-definition-names.sql");
+        this.deleteAnomaliesForDateSql = sqlResourceLoader.read("classpath:sql/target/delete-anomalies-for-date.sql");
+        this.selectAnomaliesOnDateSql = sqlResourceLoader.read("classpath:sql/target/select-anomalies-on-date.sql");
+        this.selectActiveReportSubscriptionsSql = sqlResourceLoader.read("classpath:sql/target/select-active-report-subscriptions.sql");
     }
 
     public void replaceDefinitionsAndHistory(
@@ -47,13 +59,7 @@ public class Uc4TargetRepository {
     }
 
     public List<Uc4JobRunHistory> findRunsOn(LocalDate businessDate) {
-        return namedJdbcTemplate.query("""
-                select uc4_run_id, job_name, plan_name, start_time, end_time, duration_seconds,
-                       status, return_code, last_report, business_date
-                from uc4_job_run_history
-                where business_date = :businessDate
-                order by coalesce(plan_name, ''), job_name, start_time
-                """, Map.of("businessDate", Date.valueOf(businessDate)), (rs, rowNum) -> new Uc4JobRunHistory(
+        return namedJdbcTemplate.query(selectRunsOnDateSql, Map.of("businessDate", Date.valueOf(businessDate)), (rs, rowNum) -> new Uc4JobRunHistory(
                 rs.getString("uc4_run_id"),
                 rs.getString("job_name"),
                 rs.getString("plan_name"),
@@ -68,20 +74,7 @@ public class Uc4TargetRepository {
     }
 
     public List<DurationBaseline> findDurationBaselines(LocalDate from, LocalDate to, int minimumRuns) {
-        return namedJdbcTemplate.query("""
-                select job_name,
-                       count(*) as run_count,
-                       avg(duration_seconds) as avg_duration_seconds,
-                       min(duration_seconds) as min_duration_seconds,
-                       max(duration_seconds) as max_duration_seconds
-                from uc4_job_run_history
-                where business_date >= :from
-                  and business_date < :to
-                  and duration_seconds is not null
-                  and coalesce(status, '') not in ('FAILED', 'ABENDED')
-                group by job_name
-                having count(*) >= :minimumRuns
-                """, Map.of(
+        return namedJdbcTemplate.query(selectDurationBaselinesSql, Map.of(
                 "from", Date.valueOf(from),
                 "to", Date.valueOf(to),
                 "minimumRuns", minimumRuns
@@ -95,15 +88,12 @@ public class Uc4TargetRepository {
     }
 
     public List<String> findActiveDefinitionNames() {
-        return jdbcTemplate.queryForList(
-                "select job_name from uc4_job_definition where active = true",
-                String.class
-        );
+        return jdbcTemplate.queryForList(selectActiveDefinitionNamesSql, String.class);
     }
 
     public void deleteAnomaliesForDate(LocalDate businessDate) {
         namedJdbcTemplate.update(
-                "delete from uc4_job_anomaly_log where business_date = :businessDate",
+                deleteAnomaliesForDateSql,
                 Map.of("businessDate", Date.valueOf(businessDate))
         );
     }
@@ -126,14 +116,7 @@ public class Uc4TargetRepository {
     }
 
     public List<Uc4JobAnomaly> findAnomaliesOn(LocalDate businessDate) {
-        return namedJdbcTemplate.query("""
-                select job_name, plan_name, run_id, business_date, anomaly_type,
-                       actual_duration_seconds, avg_duration_seconds, min_duration_seconds,
-                       max_duration_seconds, deviation_percent, description
-                from uc4_job_anomaly_log
-                where business_date = :businessDate
-                order by job_name, anomaly_type
-                """, Map.of("businessDate", Date.valueOf(businessDate)), (rs, rowNum) -> new Uc4JobAnomaly(
+        return namedJdbcTemplate.query(selectAnomaliesOnDateSql, Map.of("businessDate", Date.valueOf(businessDate)), (rs, rowNum) -> new Uc4JobAnomaly(
                 rs.getString("job_name"),
                 rs.getString("plan_name"),
                 rs.getString("run_id"),
@@ -149,12 +132,7 @@ public class Uc4TargetRepository {
     }
 
     public List<ReportSubscription> findActiveReportSubscriptions() {
-        return jdbcTemplate.query("""
-                select scope_type, scope_value
-                from uc4_report_subscription
-                where active = true
-                order by scope_type, scope_value
-                """, (rs, rowNum) -> new ReportSubscription(
+        return jdbcTemplate.query(selectActiveReportSubscriptionsSql, (rs, rowNum) -> new ReportSubscription(
                 rs.getString("scope_type"),
                 rs.getString("scope_value")
         ));

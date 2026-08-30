@@ -31,6 +31,15 @@ Target insert SQL is also kept in resource files:
 - `src/main/resources/sql/target/insert-run-history.sql`
 - `src/main/resources/sql/target/insert-anomaly-log.sql`
 
+Target select/delete SQL is kept in resource files too:
+
+- `src/main/resources/sql/target/select-runs-on-date.sql`
+- `src/main/resources/sql/target/select-duration-baselines.sql`
+- `src/main/resources/sql/target/select-active-definition-names.sql`
+- `src/main/resources/sql/target/delete-anomalies-for-date.sql`
+- `src/main/resources/sql/target/select-anomalies-on-date.sql`
+- `src/main/resources/sql/target/select-active-report-subscriptions.sql`
+
 Keep the aliases used by the app:
 
 - Definition query: `uc4_object_id`, `job_name`, `object_type`, `plan_name`, `folder_path`, `team_code`, `active`
