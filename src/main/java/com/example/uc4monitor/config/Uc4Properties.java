@@ -18,8 +18,8 @@ public record Uc4Properties(
     }
 
     public record Sync(
-            @NotBlank String definitionQuery,
-            @NotBlank String runHistoryQuery
+            @NotBlank String definitionQueryLocation,
+            @NotBlank String runHistoryQueryLocation
     ) {
     }
 }

@@ -20,7 +20,12 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=uc4Dail
 
 ## Configuration
 
-UC4 source SQL is configurable in `src/main/resources/application.yml`. Keep the aliases used by the app:
+UC4 source SQL is kept in separate resource files and referenced from `src/main/resources/application.yml`:
+
+- `src/main/resources/sql/uc4-job-definitions.sql`
+- `src/main/resources/sql/uc4-run-history.sql`
+
+Keep the aliases used by the app:
 
 - Definition query: `uc4_object_id`, `job_name`, `object_type`, `plan_name`, `folder_path`, `team_code`, `active`
 - Run history query: `uc4_run_id`, `job_name`, `plan_name`, `start_time`, `end_time`, `duration_seconds`, `status`, `return_code`, `last_report`, `business_date`

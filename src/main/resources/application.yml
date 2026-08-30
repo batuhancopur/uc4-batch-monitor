@@ -36,34 +36,9 @@ uc4:
   team-code: ${UC4_TEAM_CODE:TEAM}
   lookback-days: ${UC4_LOOKBACK_DAYS:30}
   sync:
-    # Adjust these SQL statements to your Automic version/schema. The application depends on the aliases only.
-    definition-query: |
-      select
-        cast(oh.oh_idnr as varchar(128)) as uc4_object_id,
-        oh.oh_name as job_name,
-        oh.oh_otype as object_type,
-        cast(null as varchar(255)) as plan_name,
-        cast(null as varchar(1024)) as folder_path,
-        :teamCode as team_code,
-        case when oh.oh_deleteflag = 0 then true else false end as active
-      from oh
-      where oh.oh_name like :teamNamePattern
-        and oh.oh_otype in ('JOBS', 'JOBP', 'JSCH')
-    run-history-query: |
-      select
-        cast(ah.ah_idnr as varchar(128)) as uc4_run_id,
-        ah.ah_name as job_name,
-        cast(null as varchar(255)) as plan_name,
-        ah.ah_timestamp1 as start_time,
-        ah.ah_timestamp2 as end_time,
-        extract(epoch from (ah.ah_timestamp2 - ah.ah_timestamp1)) as duration_seconds,
-        cast(ah.ah_status as varchar(64)) as status,
-        ah.ah_retcode as return_code,
-        cast(null as varchar(4000)) as last_report,
-        cast(ah.ah_timestamp1 as date) as business_date
-      from ah
-      where ah.ah_name like :teamNamePattern
-        and ah.ah_timestamp1 >= :lookbackStart
+    # Adjust these SQL files to your Automic version/schema. The application depends on the aliases only.
+    definition-query-location: classpath:sql/uc4-job-definitions.sql
+    run-history-query-location: classpath:sql/uc4-run-history.sql
 
 uc4-anomaly:
   lookback-days: ${ANOMALY_LOOKBACK_DAYS:30}
