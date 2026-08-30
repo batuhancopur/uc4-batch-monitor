@@ -1,0 +1,7 @@
+target/
+work/.m2/
+.idea/
+*.iml
+.DS_Store
+*.log
+/.env

@@ -1,0 +1,76 @@
+spring:
+  application:
+    name: uc4-batch-monitor
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: true
+  datasource:
+    target:
+      jdbc-url: ${TARGET_DB_URL:jdbc:postgresql://localhost:5432/uc4_monitor}
+      username: ${TARGET_DB_USERNAME:uc4_monitor}
+      password: ${TARGET_DB_PASSWORD:uc4_monitor}
+      driver-class-name: ${TARGET_DB_DRIVER:org.postgresql.Driver}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:false}
+
+uc4:
+  datasource:
+    jdbc-url: ${UC4_DB_URL:jdbc:oracle:thin:@//localhost:1521/UC4}
+    username: ${UC4_DB_USERNAME:uc4}
+    password: ${UC4_DB_PASSWORD:uc4}
+    driver-class-name: ${UC4_DB_DRIVER:oracle.jdbc.OracleDriver}
+  team-code: ${UC4_TEAM_CODE:TEAM}
+  lookback-days: ${UC4_LOOKBACK_DAYS:30}
+  sync:
+    # Adjust these SQL statements to your Automic version/schema. The application depends on the aliases only.
+    definition-query: |
+      select
+        cast(oh.oh_idnr as varchar(128)) as uc4_object_id,
+        oh.oh_name as job_name,
+        oh.oh_otype as object_type,
+        cast(null as varchar(255)) as plan_name,
+        cast(null as varchar(1024)) as folder_path,
+        :teamCode as team_code,
+        case when oh.oh_deleteflag = 0 then true else false end as active
+      from oh
+      where oh.oh_name like :teamNamePattern
+        and oh.oh_otype in ('JOBS', 'JOBP', 'JSCH')
+    run-history-query: |
+      select
+        cast(ah.ah_idnr as varchar(128)) as uc4_run_id,
+        ah.ah_name as job_name,
+        cast(null as varchar(255)) as plan_name,
+        ah.ah_timestamp1 as start_time,
+        ah.ah_timestamp2 as end_time,
+        extract(epoch from (ah.ah_timestamp2 - ah.ah_timestamp1)) as duration_seconds,
+        cast(ah.ah_status as varchar(64)) as status,
+        ah.ah_retcode as return_code,
+        cast(null as varchar(4000)) as last_report,
+        cast(ah.ah_timestamp1 as date) as business_date
+      from ah
+      where ah.ah_name like :teamNamePattern
+        and ah.ah_timestamp1 >= :lookbackStart
+
+uc4-anomaly:
+  lookback-days: ${ANOMALY_LOOKBACK_DAYS:30}
+  duration-threshold-percent: ${ANOMALY_DURATION_THRESHOLD_PERCENT:40}
+  minimum-baseline-runs: ${ANOMALY_MIN_BASELINE_RUNS:5}
+
+uc4-report:
+  from: ${REPORT_MAIL_FROM:uc4-monitor@example.com}
+  recipients: ${REPORT_MAIL_RECIPIENTS:team@example.com}
+  subject-prefix: ${REPORT_MAIL_SUBJECT_PREFIX:[UC4]}
