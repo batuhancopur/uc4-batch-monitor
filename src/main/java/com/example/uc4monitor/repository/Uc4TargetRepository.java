@@ -27,7 +27,6 @@ public class Uc4TargetRepository {
     private final String insertAnomalyLogSql;
     private final String deleteRunHistorySql;
     private final String deleteJobDefinitionSql;
-    private final String selectCurrentBusinessDateSql;
     private final String selectRunsOnDateSql;
     private final String selectDurationBaselinesSql;
     private final String selectActiveDefinitionNamesSql;
@@ -47,7 +46,6 @@ public class Uc4TargetRepository {
         this.insertAnomalyLogSql = sqlResourceLoader.read("classpath:sql/target/insert-anomaly-log.sql");
         this.deleteRunHistorySql = sqlResourceLoader.read("classpath:sql/target/delete-run-history.sql");
         this.deleteJobDefinitionSql = sqlResourceLoader.read("classpath:sql/target/delete-job-definition.sql");
-        this.selectCurrentBusinessDateSql = sqlResourceLoader.read("classpath:sql/target/select-current-business-date.sql");
         this.selectRunsOnDateSql = sqlResourceLoader.read("classpath:sql/target/select-runs-on-date.sql");
         this.selectDurationBaselinesSql = sqlResourceLoader.read("classpath:sql/target/select-duration-baselines.sql");
         this.selectActiveDefinitionNamesSql = sqlResourceLoader.read("classpath:sql/target/select-active-definition-names.sql");
@@ -64,10 +62,6 @@ public class Uc4TargetRepository {
         jdbcTemplate.execute(deleteJobDefinitionSql);
         insertDefinitions(definitions);
         insertRunHistories(histories);
-    }
-
-    public LocalDate currentBusinessDate() {
-        return jdbcTemplate.queryForObject(selectCurrentBusinessDateSql, (rs, rowNum) -> rs.getDate("business_date").toLocalDate());
     }
 
     public List<Uc4JobRunHistory> findRunsOn(LocalDate businessDate) {

@@ -35,7 +35,11 @@ public class AnomalyDetectionService {
 
     @Transactional
     public List<Uc4JobAnomaly> detect() {
-        LocalDate businessDate = repository.currentBusinessDate();
+        return detectFor(LocalDate.now());
+    }
+
+    @Transactional
+    public List<Uc4JobAnomaly> detectFor(LocalDate businessDate) {
         LocalDate baselineStart = businessDate.minusDays(properties.lookbackDays());
         Map<BaselineKey, DurationBaseline> baselines = repository
                 .findDurationBaselines(baselineStart, businessDate, properties.minimumBaselineRuns())

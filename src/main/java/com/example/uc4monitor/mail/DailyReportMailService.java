@@ -37,7 +37,10 @@ public class DailyReportMailService {
     }
 
     public void sendDailyReport() {
-        LocalDate businessDate = repository.currentBusinessDate();
+        sendDailyReportFor(LocalDate.now());
+    }
+
+    public void sendDailyReportFor(LocalDate businessDate) {
         List<ReportSubscription> subscriptions = repository.findActiveReportSubscriptions();
         List<Uc4JobRunHistory> runs = filter(repository.findRunsOn(businessDate), subscriptions);
         List<Uc4JobAnomaly> anomalies = filterAnomalies(repository.findAnomaliesOn(businessDate), subscriptions);
