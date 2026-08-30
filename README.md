@@ -7,12 +7,12 @@ Target tables intentionally do not use foreign keys.
 
 ## Jobs
 
-Run one job at a time with `spring.batch.job.name`.
+Run one job at a time with `--jobName`. The application disables Spring Boot's default batch launcher so that a parameterless startup cannot run all jobs.
 
 ```bash
-mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=uc4MetadataSyncJob"
-mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=uc4RuntimeAnomalyDetectionJob"
-mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=uc4DailyReportMailJob"
+mvn spring-boot:run -Dspring-boot.run.arguments="--jobName=uc4MetadataSyncJob"
+mvn spring-boot:run -Dspring-boot.run.arguments="--jobName=uc4RuntimeAnomalyDetectionJob --businessDate=2026-08-30"
+mvn spring-boot:run -Dspring-boot.run.arguments="--jobName=uc4DailyReportMailJob --businessDate=2026-08-30"
 ```
 
 ## Data Flow
