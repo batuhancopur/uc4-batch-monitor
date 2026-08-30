@@ -39,6 +39,8 @@ Target select/delete SQL is kept in resource files too:
 - `src/main/resources/sql/target/delete-anomalies-for-date.sql`
 - `src/main/resources/sql/target/select-anomalies-on-date.sql`
 - `src/main/resources/sql/target/select-active-report-subscriptions.sql`
+- `src/main/resources/sql/target/truncate-run-history.sql`
+- `src/main/resources/sql/target/truncate-job-definition.sql`
 
 Keep the aliases used by the app:
 

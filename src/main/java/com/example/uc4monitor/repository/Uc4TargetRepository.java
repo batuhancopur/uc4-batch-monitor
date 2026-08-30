@@ -23,6 +23,8 @@ public class Uc4TargetRepository {
     private final String insertJobDefinitionSql;
     private final String insertRunHistorySql;
     private final String insertAnomalyLogSql;
+    private final String truncateRunHistorySql;
+    private final String truncateJobDefinitionSql;
     private final String selectRunsOnDateSql;
     private final String selectDurationBaselinesSql;
     private final String selectActiveDefinitionNamesSql;
@@ -40,6 +42,8 @@ public class Uc4TargetRepository {
         this.insertJobDefinitionSql = sqlResourceLoader.read("classpath:sql/target/insert-job-definition.sql");
         this.insertRunHistorySql = sqlResourceLoader.read("classpath:sql/target/insert-run-history.sql");
         this.insertAnomalyLogSql = sqlResourceLoader.read("classpath:sql/target/insert-anomaly-log.sql");
+        this.truncateRunHistorySql = sqlResourceLoader.read("classpath:sql/target/truncate-run-history.sql");
+        this.truncateJobDefinitionSql = sqlResourceLoader.read("classpath:sql/target/truncate-job-definition.sql");
         this.selectRunsOnDateSql = sqlResourceLoader.read("classpath:sql/target/select-runs-on-date.sql");
         this.selectDurationBaselinesSql = sqlResourceLoader.read("classpath:sql/target/select-duration-baselines.sql");
         this.selectActiveDefinitionNamesSql = sqlResourceLoader.read("classpath:sql/target/select-active-definition-names.sql");
@@ -52,8 +56,8 @@ public class Uc4TargetRepository {
             List<Uc4JobDefinition> definitions,
             List<Uc4JobRunHistory> histories
     ) {
-        jdbcTemplate.execute("truncate table uc4_job_run_history");
-        jdbcTemplate.execute("truncate table uc4_job_definition");
+        jdbcTemplate.execute(truncateRunHistorySql);
+        jdbcTemplate.execute(truncateJobDefinitionSql);
         insertDefinitions(definitions);
         insertRunHistories(histories);
     }
